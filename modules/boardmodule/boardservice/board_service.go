@@ -11,6 +11,7 @@ import (
 type BoardService interface {
 	ListByCondition(
 		ctx context.Context,
+		conditions map[string]interface{},
 		filter *boardmodel.Filter,
 		paging *common.Paging,
 		moreKeys ...string,
@@ -33,11 +34,12 @@ func NewBoardDefaultService(repo boardrepo.BoardRepo, appContext component.AppCo
 
 func (service *BoardDefaultService) ListByCondition(
 	ctx context.Context,
+	conditions map[string]interface{},
 	filter *boardmodel.Filter,
 	paging *common.Paging,
 	moreKeys ...string,
 ) ([]boardmodel.Board, error) {
-	return service.repo.GetListByCondition(ctx, nil, filter, paging, moreKeys...)
+	return service.repo.GetListByCondition(ctx, conditions, filter, paging, moreKeys...)
 }
 
 func (service *BoardDefaultService) Create(ctx context.Context, boardCreate *boardmodel.BoardCreate) error {

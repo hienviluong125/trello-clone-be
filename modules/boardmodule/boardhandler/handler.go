@@ -34,7 +34,9 @@ func (handler *BoardHandler) Index(c *gin.Context) {
 
 	paging.FullFill()
 
-	boards, err := handler.service.ListByCondition(c.Request.Context(), &filter, &paging)
+	currentUser := c.MustGet(common.CurrentUser).(common.Requester)
+
+	boards, err := handler.service.ListByCondition(c.Request.Context(), map[string]interface{}{"owner_id": currentUser.GetUserId()}, &filter, &paging)
 
 	if err != nil {
 		panic(err)
@@ -77,6 +79,17 @@ func (handler *BoardHandler) Update(c *gin.Context) {
 		panic(err)
 	}
 
+	currentUser := c.MustGet(common.CurrentUser).(common.Requester)
+	board, err := handler.service.FindByCondition(c.Request.Context(), map[string]interface{}{"id": id, "owner_id": currentUser.GetUserId()})
+
+	if err != nil {
+		panic(errorhandler.ErrCannotGetRecord("board", err))
+	}
+
+	if board == nil {
+		panic(errorhandler.ErrCannotGetRecord("board", nil))
+	}
+
 	if err := handler.service.UpdateById(c.Request.Context(), id, boardUpdate); err != nil {
 		panic(err)
 	}
@@ -91,7 +104,8 @@ func (handler *BoardHandler) Destroy(c *gin.Context) {
 		panic(err)
 	}
 
-	board, err := handler.service.FindByCondition(c.Request.Context(), map[string]interface{}{"id": id})
+	currentUser := c.MustGet(common.CurrentUser).(common.Requester)
+	board, err := handler.service.FindByCondition(c.Request.Context(), map[string]interface{}{"id": id, "owner_id": currentUser.GetUserId()})
 
 	if err != nil {
 		panic(errorhandler.ErrCannotGetRecord("board", err))
