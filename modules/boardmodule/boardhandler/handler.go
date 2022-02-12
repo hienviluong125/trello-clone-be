@@ -2,9 +2,11 @@ package boardhandler
 
 import (
 	"hienviluong125/trello-clone-be/common"
+	"hienviluong125/trello-clone-be/errorhandler"
 	"hienviluong125/trello-clone-be/modules/boardmodule/boardmodel"
 	boardserivce "hienviluong125/trello-clone-be/modules/boardmodule/boardservice"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -56,6 +58,50 @@ func (handler *BoardHandler) Create(c *gin.Context) {
 	boardCreate.OwnerId = currentUser.GetUserId()
 
 	if err := handler.service.Create(c.Request.Context(), boardCreate); err != nil {
+		panic(err)
+	}
+
+	c.Status(http.StatusOK)
+}
+
+func (handler *BoardHandler) Update(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		panic(err)
+	}
+
+	var boardUpdate *boardmodel.BoardUpdate
+
+	if err := c.ShouldBind(&boardUpdate); err != nil {
+		panic(err)
+	}
+
+	if err := handler.service.UpdateById(c.Request.Context(), id, boardUpdate); err != nil {
+		panic(err)
+	}
+
+	c.Status(http.StatusOK)
+}
+
+func (handler *BoardHandler) Destroy(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		panic(err)
+	}
+
+	board, err := handler.service.FindByCondition(c.Request.Context(), map[string]interface{}{"id": id})
+
+	if err != nil {
+		panic(errorhandler.ErrCannotGetRecord("board", err))
+	}
+
+	if board == nil {
+		panic(errorhandler.ErrCannotGetRecord("board", nil))
+	}
+
+	if err := handler.service.DeactiveById(c.Request.Context(), id); err != nil {
 		panic(err)
 	}
 

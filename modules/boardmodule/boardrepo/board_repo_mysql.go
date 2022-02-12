@@ -41,7 +41,7 @@ func (repo *BoardRepoMysql) FindByCondition(ctx context.Context, condition map[s
 		db = db.Preload(moreKeys[i])
 	}
 
-	if err := db.Where(condition).First(&board).Error; err != nil {
+	if err := db.Where("status IS TRUE").Where(condition).First(&board).Error; err != nil {
 		return nil, err
 	}
 

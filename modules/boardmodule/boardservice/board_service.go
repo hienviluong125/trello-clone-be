@@ -16,8 +16,9 @@ type BoardService interface {
 		moreKeys ...string,
 	) ([]boardmodel.Board, error)
 	Create(ctx context.Context, boardCreate *boardmodel.BoardCreate) error
-	// UpdateById(ctx context.Context, boardId int, boardUpdate *boardmodel.BoardUpdate) error
-	// DeactiveById(ctx context.Context, boardId int) error
+	FindByCondition(ctx context.Context, conditions map[string]interface{}) (*boardmodel.Board, error)
+	UpdateById(ctx context.Context, boardId int, boardUpdate *boardmodel.BoardUpdate) error
+	DeactiveById(ctx context.Context, boardId int) error
 	// AddMember(ctx context.Context, boardId int, userId int) error
 }
 
@@ -42,4 +43,18 @@ func (service *BoardDefaultService) ListByCondition(
 func (service *BoardDefaultService) Create(ctx context.Context, boardCreate *boardmodel.BoardCreate) error {
 	boardCreate.Status = true
 	return service.repo.Create(ctx, boardCreate)
+}
+
+func (service *BoardDefaultService) FindByCondition(ctx context.Context, conditions map[string]interface{}) (*boardmodel.Board, error) {
+	return service.repo.FindByCondition(ctx, conditions)
+}
+
+func (service *BoardDefaultService) UpdateById(ctx context.Context, boardId int, boardUpdate *boardmodel.BoardUpdate) error {
+	return service.repo.UpdateById(ctx, boardId, boardUpdate)
+}
+
+func (service *BoardDefaultService) DeactiveById(ctx context.Context, boardId int) error {
+	status := false
+	softDestroyParams := &boardmodel.BoardUpdate{Status: &status}
+	return service.repo.UpdateById(ctx, boardId, softDestroyParams)
 }

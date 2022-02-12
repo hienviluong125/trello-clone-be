@@ -53,6 +53,8 @@ func main() {
 	// board resources
 	r.GET("/boards", middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}), boardHandler.Index)
 	r.POST("/boards", middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}), boardHandler.Create)
+	r.PUT("/boards/:id", middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}), boardHandler.Update)
+	r.DELETE("/boards/:id", middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}), boardHandler.Destroy)
 
 	r.Run(":8080")
 }

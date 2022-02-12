@@ -6,7 +6,7 @@ import (
 
 type BoardUpdate struct {
 	Name   string `json:"name" gorm:"column:name;"`
-	Status bool   `json:"-" gorm:"column:status;"`
+	Status *bool  `json:"-" gorm:"column:status;"`
 }
 
 func (BoardUpdate) TableName() string {
