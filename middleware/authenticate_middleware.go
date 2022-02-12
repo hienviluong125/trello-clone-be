@@ -6,7 +6,7 @@ import (
 	"hienviluong125/trello-clone-be/common"
 	"hienviluong125/trello-clone-be/component"
 	"hienviluong125/trello-clone-be/errorhandler"
-	"hienviluong125/trello-clone-be/modules/usermodule"
+	"hienviluong125/trello-clone-be/modules/usermodule/userrepo"
 	"strconv"
 	"strings"
 
@@ -51,7 +51,7 @@ func Authenticate(ac component.AppContext) gin.HandlerFunc {
 			panic(errorhandler.ErrUnauthorized(err))
 		}
 
-		userRepo := usermodule.NewUserRepoMysql(ac.GetDbConnection())
+		userRepo := userrepo.NewUserRepoMysql(ac.GetDbConnection())
 		authenticatedUser, err := userRepo.FindByCondition(c.Request.Context(), map[string]interface{}{"id": userId})
 
 		if err != nil {

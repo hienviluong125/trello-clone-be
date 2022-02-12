@@ -1,23 +1,25 @@
-package usermodule
+package userhandler
 
 import (
 	"hienviluong125/trello-clone-be/common"
 	"hienviluong125/trello-clone-be/errorhandler"
+	"hienviluong125/trello-clone-be/modules/usermodule/usermodel"
+	"hienviluong125/trello-clone-be/modules/usermodule/userservice"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type UserHandler struct {
-	service UserService
+	service userservice.UserService
 }
 
-func NewUserHandler(service UserService) *UserHandler {
+func NewUserHandler(service userservice.UserService) *UserHandler {
 	return &UserHandler{service: service}
 }
 
 func (handler *UserHandler) Signup(c *gin.Context) {
-	var userCreate UserCreate
+	var userCreate usermodel.UserCreate
 
 	if err := c.ShouldBind(&userCreate); err != nil {
 		panic(err)
@@ -31,7 +33,7 @@ func (handler *UserHandler) Signup(c *gin.Context) {
 }
 
 func (handler *UserHandler) Login(c *gin.Context) {
-	var userLogin UserLogin
+	var userLogin usermodel.UserLogin
 
 	if err := c.ShouldBind(&userLogin); err != nil {
 		panic(err)

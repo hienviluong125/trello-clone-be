@@ -1,30 +1,32 @@
-package usermodule
+package userservice
 
 import (
 	"context"
 	"hienviluong125/trello-clone-be/common"
 	"hienviluong125/trello-clone-be/component"
 	"hienviluong125/trello-clone-be/errorhandler"
+	"hienviluong125/trello-clone-be/modules/usermodule/usermodel"
+	"hienviluong125/trello-clone-be/modules/usermodule/userrepo"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService interface {
-	Signup(ctx context.Context, userCreate *UserCreate) error
-	Login(ctx context.Context, userLogin *UserLogin) (*string, *string, error)
+	Signup(ctx context.Context, userCreate *usermodel.UserCreate) error
+	Login(ctx context.Context, userLogin *usermodel.UserLogin) (*string, *string, error)
 	RefreshCredentials(ctx context.Context, rfToken string) (*string, *string, error)
 }
 
 type UserDefaultService struct {
-	repo       UserRepo
+	repo       userrepo.UserRepo
 	appContext component.AppContext
 }
 
-func NewUserDefaultService(repo UserRepo, appContext component.AppContext) *UserDefaultService {
+func NewUserDefaultService(repo userrepo.UserRepo, appContext component.AppContext) *UserDefaultService {
 	return &UserDefaultService{repo: repo, appContext: appContext}
 }
 
-func (service *UserDefaultService) Signup(ctx context.Context, userCreate *UserCreate) error {
+func (service *UserDefaultService) Signup(ctx context.Context, userCreate *usermodel.UserCreate) error {
 	existedUser, err := service.repo.FindByCondition(ctx, map[string]interface{}{"email": userCreate.Email})
 
 	if existedUser != nil {
@@ -52,7 +54,7 @@ func (service *UserDefaultService) Signup(ctx context.Context, userCreate *UserC
 	return nil
 }
 
-func (service *UserDefaultService) Login(ctx context.Context, userLogin *UserLogin) (*string, *string, error) {
+func (service *UserDefaultService) Login(ctx context.Context, userLogin *usermodel.UserLogin) (*string, *string, error) {
 	if err := userLogin.Validate(); err != nil {
 		return nil, nil, errorhandler.ErrUnauthorized(err)
 	}
@@ -81,7 +83,7 @@ func (service *UserDefaultService) Login(ctx context.Context, userLogin *UserLog
 		return nil, nil, err
 	}
 
-	err = service.repo.UpdateById(ctx, user.Id, &UserUpdate{RefreshToken: refreshToken})
+	err = service.repo.UpdateById(ctx, user.Id, &usermodel.UserUpdate{RefreshToken: refreshToken})
 
 	if err != nil {
 		return nil, nil, err
@@ -111,7 +113,7 @@ func (service *UserDefaultService) RefreshCredentials(ctx context.Context, rfTok
 		return nil, nil, err
 	}
 
-	err = service.repo.UpdateById(ctx, user.Id, &UserUpdate{RefreshToken: refreshToken})
+	err = service.repo.UpdateById(ctx, user.Id, &usermodel.UserUpdate{RefreshToken: refreshToken})
 
 	if err != nil {
 		return nil, nil, err

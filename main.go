@@ -3,7 +3,10 @@ package main
 import (
 	"hienviluong125/trello-clone-be/component"
 	"hienviluong125/trello-clone-be/middleware"
-	"hienviluong125/trello-clone-be/modules/usermodule"
+	"hienviluong125/trello-clone-be/modules/usermodule/userhandler"
+	"hienviluong125/trello-clone-be/modules/usermodule/usermodel"
+	"hienviluong125/trello-clone-be/modules/usermodule/userrepo"
+	"hienviluong125/trello-clone-be/modules/usermodule/userservice"
 	"log"
 	"os"
 
@@ -15,7 +18,7 @@ import (
 func main() {
 	dsn := os.Getenv("DATABASE_URL")
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	db.AutoMigrate(&usermodule.User{})
+	db.AutoMigrate(&usermodel.User{})
 
 	if err != nil {
 		panic(err)
@@ -28,9 +31,9 @@ func main() {
 	r := gin.Default()
 	r.Use(middleware.Recover(appContext))
 
-	userRepo := usermodule.NewUserRepoMysql(db)
-	userService := usermodule.NewUserDefaultService(userRepo, appContext)
-	userHandler := usermodule.NewUserHandler(userService)
+	userRepo := userrepo.NewUserRepoMysql(db)
+	userService := userservice.NewUserDefaultService(userRepo, appContext)
+	userHandler := userhandler.NewUserHandler(userService)
 
 	r.GET("/", Home)
 	r.POST("/signup", userHandler.Signup)
