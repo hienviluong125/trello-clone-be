@@ -3,6 +3,10 @@ package main
 import (
 	"hienviluong125/trello-clone-be/component"
 	"hienviluong125/trello-clone-be/middleware"
+	"hienviluong125/trello-clone-be/modules/boardmodule/boardhandler"
+	"hienviluong125/trello-clone-be/modules/boardmodule/boardmodel"
+	"hienviluong125/trello-clone-be/modules/boardmodule/boardrepo"
+	"hienviluong125/trello-clone-be/modules/boardmodule/boardservice"
 	"hienviluong125/trello-clone-be/modules/usermodule/userhandler"
 	"hienviluong125/trello-clone-be/modules/usermodule/usermodel"
 	"hienviluong125/trello-clone-be/modules/usermodule/userrepo"
@@ -19,6 +23,7 @@ func main() {
 	dsn := os.Getenv("DATABASE_URL")
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	db.AutoMigrate(&usermodel.User{})
+	db.AutoMigrate(&boardmodel.Board{})
 
 	if err != nil {
 		panic(err)
@@ -35,16 +40,19 @@ func main() {
 	userService := userservice.NewUserDefaultService(userRepo, appContext)
 	userHandler := userhandler.NewUserHandler(userService)
 
+	boardRepo := boardrepo.NewBoardRepoMysql(db)
+	boardService := boardservice.NewBoardDefaultService(boardRepo, appContext)
+	boardHandler := boardhandler.NewBoardHandler(boardService)
+
 	r.GET("/", Home)
+	// user resources
 	r.POST("/signup", userHandler.Signup)
 	r.POST("/login", userHandler.Login)
 	r.POST("/users/keep_login", userHandler.KeepLogin)
-
-	authorized := r.Group("/users")
-	authorized.Use(middleware.Authenticate(appContext))
-	{
-		authorized.GET("/profile", middleware.Authorize(appContext, []string{"member"}), userHandler.Profile)
-	}
+	r.GET("/users/profile", middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}), userHandler.Profile)
+	// board resources
+	r.GET("/boards", middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}), boardHandler.Index)
+	r.POST("/boards", middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}), boardHandler.Create)
 
 	r.Run(":8080")
 }
