@@ -24,6 +24,7 @@ func main() {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	db.AutoMigrate(&usermodel.User{})
 	db.AutoMigrate(&boardmodel.Board{})
+	db.Debug()
 
 	if err != nil {
 		panic(err)

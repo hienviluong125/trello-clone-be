@@ -36,7 +36,7 @@ func (handler *BoardHandler) Index(c *gin.Context) {
 
 	currentUser := c.MustGet(common.CurrentUser).(common.Requester)
 
-	boards, err := handler.service.ListByCondition(c.Request.Context(), map[string]interface{}{"owner_id": currentUser.GetUserId()}, &filter, &paging)
+	boards, err := handler.service.ListByCondition(c.Request.Context(), map[string]interface{}{"owner_id": currentUser.GetUserId()}, &filter, &paging, "Owner", "Members")
 
 	if err != nil {
 		panic(err)
