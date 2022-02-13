@@ -56,6 +56,7 @@ func main() {
 	r.POST("/boards", middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}), boardHandler.Create)
 	r.PUT("/boards/:id", middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}), boardHandler.Update)
 	r.DELETE("/boards/:id", middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}), boardHandler.Destroy)
+	r.POST("/boards/:id/add_member", middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}), boardHandler.AddMember)
 
 	r.Run(":8080")
 }

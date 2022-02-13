@@ -1,7 +1,7 @@
 package boardmodel
 
 type UserBoard struct {
-	UserId  int `json:"-" gorm:"column:user_id;"`
+	UserId  int `json:"user_id" gorm:"column:user_id;"`
 	BoardId int `json:"-" gorm:"column:board_id;"`
 }
 
