@@ -10,6 +10,7 @@ type User struct {
 	Status         bool   `json:"-" gorm:"column:status"`
 	Role           string `json:"-" gorm:"column:role"`
 	RefreshToken   string `json:"-" gorm:"column:refresh_token"`
+	// Boards         []*boardmodel.Board `json:"boards"`
 }
 
 func (User) TableName() string {

@@ -44,12 +44,6 @@ func (repo *UserRepoMysql) FindByCondition(ctx context.Context, condition map[st
 	}
 
 	if err := db.Where(condition).First(&user).Error; err != nil {
-		// if err == gorm.ErrRecordNotFound {
-		// 	return nil, common.RecordNotFound
-		// }
-
-		// return nil, common.RecordNotFound
-
 		return nil, err
 	}
 
