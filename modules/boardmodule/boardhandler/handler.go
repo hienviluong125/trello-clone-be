@@ -79,15 +79,8 @@ func (handler *BoardHandler) Update(c *gin.Context) {
 		panic(err)
 	}
 
-	currentUser := c.MustGet(common.CurrentUser).(common.Requester)
-	board, err := handler.service.FindByCondition(c.Request.Context(), map[string]interface{}{"id": id, "owner_id": currentUser.GetUserId()})
-
-	if err != nil {
-		panic(errorhandler.ErrCannotGetRecord("board", err))
-	}
-
-	if board == nil {
-		panic(errorhandler.ErrCannotGetRecord("board", nil))
+	if err := handler.AuthorizeBoard(c); err != nil {
+		panic(err)
 	}
 
 	if err := handler.service.UpdateById(c.Request.Context(), id, boardUpdate); err != nil {
@@ -104,15 +97,8 @@ func (handler *BoardHandler) Destroy(c *gin.Context) {
 		panic(err)
 	}
 
-	currentUser := c.MustGet(common.CurrentUser).(common.Requester)
-	board, err := handler.service.FindByCondition(c.Request.Context(), map[string]interface{}{"id": id, "owner_id": currentUser.GetUserId()})
-
-	if err != nil {
-		panic(errorhandler.ErrCannotGetRecord("board", err))
-	}
-
-	if board == nil {
-		panic(errorhandler.ErrCannotGetRecord("board", nil))
+	if err := handler.AuthorizeBoard(c); err != nil {
+		panic(err)
 	}
 
 	if err := handler.service.DeactiveById(c.Request.Context(), id); err != nil {
@@ -120,4 +106,25 @@ func (handler *BoardHandler) Destroy(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+}
+
+func (handler *BoardHandler) AuthorizeBoard(c *gin.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		return err
+	}
+
+	currentUser := c.MustGet(common.CurrentUser).(common.Requester)
+	board, err := handler.service.FindByCondition(c.Request.Context(), map[string]interface{}{"id": id, "owner_id": currentUser.GetUserId()})
+
+	if err != nil {
+		return errorhandler.ErrCannotGetRecord("board", err)
+	}
+
+	if board == nil {
+		return errorhandler.ErrCannotGetRecord("board", nil)
+	}
+
+	return nil
 }
