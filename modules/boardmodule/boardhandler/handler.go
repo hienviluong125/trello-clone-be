@@ -56,6 +56,10 @@ func (handler *BoardHandler) Create(c *gin.Context) {
 		panic(err)
 	}
 
+	if err := boardCreate.Validate(); err != nil {
+		panic(errorhandler.ErrBadRequest(err))
+	}
+
 	currentUser := c.MustGet(common.CurrentUser).(common.Requester)
 	boardCreate.OwnerId = currentUser.GetUserId()
 

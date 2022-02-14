@@ -61,23 +61,29 @@ func runService(r *gin.Engine, appContext component.AppContext) {
 	userRepo := userrepo.NewUserRepoMysql(db)
 	userService := userservice.NewUserDefaultService(userRepo, appContext)
 	userHandler := userhandler.NewUserHandler(userService)
-	r.POST("/signup", userHandler.Signup)
-	r.POST("/login", userHandler.Login)
-	r.POST("/users/keep_login", userHandler.KeepLogin)
-	r.GET("/users/profile", middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}), userHandler.Profile)
 
-	// board resources
 	boardRepo := boardrepo.NewBoardRepoMysql(db)
-	boardService := boardservice.NewBoardDefaultService(boardRepo, appContext)
+	boardService := boardservice.NewBoardDefaultService(boardRepo)
 	boardHandler := boardhandler.NewBoardHandler(boardService)
-	r.GET("/boards", middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}), boardHandler.Index)
-	r.POST("/boards", middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}), boardHandler.Create)
-	r.PUT("/boards/:id", middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}), boardHandler.Update)
-	r.DELETE("/boards/:id", middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}), boardHandler.Destroy)
 
 	// user board resources
 	userBoardRepo := userboardrepo.NewUserBoardRepoMysql(db)
-	userBoardService := userboardservice.NewUserBoardDefaultService(userBoardRepo, appContext)
+	userBoardService := userboardservice.NewUserBoardDefaultService(userBoardRepo, boardRepo)
 	userBoardHandler := userboardhandler.NewUserBoardHandler(userBoardService)
-	r.POST("/boards/:id/user_boards", middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}), userBoardHandler.Create)
+
+	r.POST("/signup", userHandler.Signup)
+	r.POST("/login", userHandler.Login)
+	r.POST("/users/keep_login", userHandler.KeepLogin)
+	r.GET("/users/profile", middleware.Authenticate(appContext), userHandler.Profile)
+
+	boardHandlers := r.Group("/boards")
+	boardHandlers.Use(middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}))
+	{
+		boardHandlers.GET("/", boardHandler.Index)
+		boardHandlers.POST("/", boardHandler.Create)
+		boardHandlers.PUT("/:id", boardHandler.Update)
+		boardHandlers.DELETE("/:id", boardHandler.Destroy)
+		boardHandlers.POST("/:id/user_boards", userBoardHandler.Create)
+		boardHandlers.DELETE("/:id/user_boards/:user_id", userBoardHandler.Destroy)
+	}
 }

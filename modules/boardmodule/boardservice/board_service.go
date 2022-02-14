@@ -3,7 +3,6 @@ package boardservice
 import (
 	"context"
 	"hienviluong125/trello-clone-be/common"
-	"hienviluong125/trello-clone-be/component"
 	"hienviluong125/trello-clone-be/modules/boardmodule/boardmodel"
 	"hienviluong125/trello-clone-be/modules/boardmodule/boardrepo"
 )
@@ -23,12 +22,11 @@ type BoardService interface {
 }
 
 type BoardDefaultService struct {
-	repo       boardrepo.BoardRepo
-	appContext component.AppContext
+	repo boardrepo.BoardRepo
 }
 
-func NewBoardDefaultService(repo boardrepo.BoardRepo, appContext component.AppContext) *BoardDefaultService {
-	return &BoardDefaultService{repo: repo, appContext: appContext}
+func NewBoardDefaultService(repo boardrepo.BoardRepo) *BoardDefaultService {
+	return &BoardDefaultService{repo: repo}
 }
 
 func (service *BoardDefaultService) ListByCondition(

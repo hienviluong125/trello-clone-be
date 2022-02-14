@@ -29,18 +29,27 @@ func (handler *UserBoardHandler) Create(c *gin.Context) {
 		panic(err)
 	}
 
-	// currentUser := c.MustGet(common.CurrentUser).(common.Requester)
-	// board, err := handler.service.FindByCondition(c.Request.Context(), map[string]interface{}{"id": id, "owner_id": currentUser.GetUserId()})
-
-	// if err != nil {
-	// 	panic(errorhandler.ErrCannotGetRecord("board", err))
-	// }
-
-	// if board == nil {
-	// 	panic(errorhandler.ErrCannotGetRecord("board", nil))
-	// }
-
 	if err := handler.service.Create(c.Request.Context(), boardId, userBoardCreate["user_id"]); err != nil {
+		panic(err)
+	}
+
+	c.Status(http.StatusOK)
+}
+
+func (handler *UserBoardHandler) Destroy(c *gin.Context) {
+	boardId, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		panic(err)
+	}
+
+	userId, err := strconv.Atoi(c.Param("user_id"))
+
+	if err != nil {
+		panic(err)
+	}
+
+	if err := handler.service.Destroy(c.Request.Context(), boardId, userId); err != nil {
 		panic(err)
 	}
 

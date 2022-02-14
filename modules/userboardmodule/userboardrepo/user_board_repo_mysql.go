@@ -10,6 +10,7 @@ import (
 type UserBoardRepo interface {
 	FindByCondition(ctx context.Context, condition map[string]interface{}) (*boardmodel.UserBoard, error)
 	Create(ctx context.Context, data *boardmodel.UserBoard) error
+	Destroy(ctx context.Context, data *boardmodel.UserBoard) error
 }
 
 type UserBoardRepoMysql struct {
@@ -31,4 +32,8 @@ func (repo *UserBoardRepoMysql) FindByCondition(ctx context.Context, condition m
 
 func (repo *UserBoardRepoMysql) Create(ctx context.Context, data *boardmodel.UserBoard) error {
 	return repo.db.Create(data).Error
+}
+
+func (repo *UserBoardRepoMysql) Destroy(ctx context.Context, data *boardmodel.UserBoard) error {
+	return repo.db.Where("board_id = ? AND user_id = ?", data.BoardId, data.UserId).Delete(data).Error
 }
