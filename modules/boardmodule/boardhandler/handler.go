@@ -4,7 +4,7 @@ import (
 	"hienviluong125/trello-clone-be/common"
 	"hienviluong125/trello-clone-be/errorhandler"
 	"hienviluong125/trello-clone-be/modules/boardmodule/boardmodel"
-	boardserivce "hienviluong125/trello-clone-be/modules/boardmodule/boardservice"
+	boardservice "hienviluong125/trello-clone-be/modules/boardmodule/boardservice"
 	"net/http"
 	"strconv"
 
@@ -12,10 +12,10 @@ import (
 )
 
 type BoardHandler struct {
-	service boardserivce.BoardService
+	service boardservice.BoardService
 }
 
-func NewBoardHandler(service boardserivce.BoardService) *BoardHandler {
+func NewBoardHandler(service boardservice.BoardService) *BoardHandler {
 	return &BoardHandler{service: service}
 }
 
@@ -116,37 +116,6 @@ func (handler *BoardHandler) Destroy(c *gin.Context) {
 	}
 
 	if err := handler.service.DeactiveById(c.Request.Context(), id); err != nil {
-		panic(err)
-	}
-
-	c.Status(http.StatusOK)
-}
-
-func (handler *BoardHandler) AddMember(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-
-	if err != nil {
-		panic(err)
-	}
-
-	var userBoardCreate map[string]int
-
-	if err := c.ShouldBind(&userBoardCreate); err != nil {
-		panic(err)
-	}
-
-	currentUser := c.MustGet(common.CurrentUser).(common.Requester)
-	board, err := handler.service.FindByCondition(c.Request.Context(), map[string]interface{}{"id": id, "owner_id": currentUser.GetUserId()})
-
-	if err != nil {
-		panic(errorhandler.ErrCannotGetRecord("board", err))
-	}
-
-	if board == nil {
-		panic(errorhandler.ErrCannotGetRecord("board", nil))
-	}
-
-	if err := handler.service.AddMember(c.Request.Context(), board.Id, userBoardCreate["user_id"]); err != nil {
 		panic(err)
 	}
 

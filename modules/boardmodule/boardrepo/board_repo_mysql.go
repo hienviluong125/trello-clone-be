@@ -19,8 +19,6 @@ type BoardRepo interface {
 	Create(ctx context.Context, data *boardmodel.BoardCreate) error
 	FindByCondition(ctx context.Context, condition map[string]interface{}, moreKeys ...string) (*boardmodel.Board, error)
 	UpdateById(ctx context.Context, id int, params *boardmodel.BoardUpdate) error
-	FindUserBoardByCondition(ctx context.Context, condition map[string]interface{}) (*boardmodel.UserBoard, error)
-	CreateUserBoard(ctx context.Context, data *boardmodel.UserBoard) error
 }
 
 type BoardRepoMysql struct {
@@ -89,17 +87,4 @@ func (repo *BoardRepoMysql) GetListByCondition(
 	}
 
 	return result, nil
-}
-
-func (repo *BoardRepoMysql) FindUserBoardByCondition(ctx context.Context, condition map[string]interface{}) (*boardmodel.UserBoard, error) {
-	var userBoard boardmodel.UserBoard
-	if err := repo.db.Where(condition).First(&userBoard).Error; err != nil {
-		return nil, err
-	}
-
-	return &userBoard, nil
-}
-
-func (repo *BoardRepoMysql) CreateUserBoard(ctx context.Context, data *boardmodel.UserBoard) error {
-	return repo.db.Create(data).Error
 }

@@ -2,10 +2,8 @@ package boardservice
 
 import (
 	"context"
-	"errors"
 	"hienviluong125/trello-clone-be/common"
 	"hienviluong125/trello-clone-be/component"
-	"hienviluong125/trello-clone-be/errorhandler"
 	"hienviluong125/trello-clone-be/modules/boardmodule/boardmodel"
 	"hienviluong125/trello-clone-be/modules/boardmodule/boardrepo"
 )
@@ -22,7 +20,6 @@ type BoardService interface {
 	FindByCondition(ctx context.Context, conditions map[string]interface{}) (*boardmodel.Board, error)
 	UpdateById(ctx context.Context, boardId int, boardUpdate *boardmodel.BoardUpdate) error
 	DeactiveById(ctx context.Context, boardId int) error
-	AddMember(ctx context.Context, boardId int, userId int) error
 }
 
 type BoardDefaultService struct {
@@ -61,22 +58,4 @@ func (service *BoardDefaultService) DeactiveById(ctx context.Context, boardId in
 	status := false
 	softDestroyParams := &boardmodel.BoardUpdate{Status: &status}
 	return service.repo.UpdateById(ctx, boardId, softDestroyParams)
-}
-
-func (service *BoardDefaultService) AddMember(ctx context.Context, boardId int, userId int) error {
-	userBoard, _ := service.repo.FindUserBoardByCondition(ctx, map[string]interface{}{
-		"user_id":  userId,
-		"board_id": boardId,
-	})
-
-	if userBoard != nil {
-		return errorhandler.ErrRecordExisted("user board", errors.New("this user already was a member of this board"))
-	}
-
-	userBoardCreate := &boardmodel.UserBoard{
-		BoardId: boardId,
-		UserId:  userId,
-	}
-
-	return service.repo.CreateUserBoard(ctx, userBoardCreate)
 }
