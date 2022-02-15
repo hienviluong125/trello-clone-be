@@ -11,6 +11,10 @@ import (
 	"hienviluong125/trello-clone-be/modules/listmodule/listmodel"
 	"hienviluong125/trello-clone-be/modules/listmodule/listrepo"
 	"hienviluong125/trello-clone-be/modules/listmodule/listservice"
+	"hienviluong125/trello-clone-be/modules/taskmodule/taskhandler"
+	"hienviluong125/trello-clone-be/modules/taskmodule/taskmodel"
+	"hienviluong125/trello-clone-be/modules/taskmodule/taskrepo"
+	"hienviluong125/trello-clone-be/modules/taskmodule/taskservice"
 	"hienviluong125/trello-clone-be/modules/userboardmodule/userboardhandler"
 	"hienviluong125/trello-clone-be/modules/userboardmodule/userboardrepo"
 	"hienviluong125/trello-clone-be/modules/userboardmodule/userboardservice"
@@ -32,6 +36,7 @@ func main() {
 	db.AutoMigrate(&usermodel.User{})
 	db.AutoMigrate(&boardmodel.Board{})
 	db.AutoMigrate(&listmodel.List{})
+	db.AutoMigrate(&taskmodel.Task{})
 	db.Debug()
 
 	if err != nil {
@@ -81,6 +86,11 @@ func runService(r *gin.Engine, appContext component.AppContext) {
 	listService := listservice.NewListDefaultService(listRepo)
 	listHandler := listhandler.NewListHandler(listService, boardService)
 
+	// task resources
+	taskRepo := taskrepo.NewTaskRepoMysql(db)
+	taskService := taskservice.NewTaskDefaultService(taskRepo)
+	taskHandler := taskhandler.NewTaskHandler(taskService)
+
 	r.POST("/signup", userHandler.Signup)
 	r.POST("/login", userHandler.Login)
 	r.POST("/users/keep_login", userHandler.KeepLogin)
@@ -102,5 +112,13 @@ func runService(r *gin.Engine, appContext component.AppContext) {
 		boardRoutes.PUT("/:id/lists/:list_id", listHandler.Update)
 		boardRoutes.DELETE("/:id/lists/:list_id", listHandler.Destroy)
 		boardRoutes.POST("/:id/lists/swap", listHandler.SwapTwoList)
+	}
+
+	taskRoutes := r.Group("/tasks")
+	taskRoutes.Use(middleware.Authenticate(appContext), middleware.Authorize(appContext, []string{"member", "admin"}))
+	{
+		taskRoutes.POST("/", taskHandler.Create)
+		taskRoutes.PUT("/:id", taskHandler.Update)
+		taskRoutes.DELETE("/:id", taskHandler.Destroy)
 	}
 }

@@ -62,7 +62,7 @@ func (handler *ListHandler) Index(c *gin.Context) {
 
 	paging.FullFill()
 
-	lists, err := handler.service.ListByCondition(c.Request.Context(), map[string]interface{}{"board_id": boardId}, &filter, &paging)
+	lists, err := handler.service.ListByCondition(c.Request.Context(), map[string]interface{}{"board_id": boardId}, &filter, &paging, "Tasks")
 
 	if err != nil {
 		panic(err)

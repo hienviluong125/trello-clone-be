@@ -4,6 +4,7 @@ import (
 	"context"
 	"hienviluong125/trello-clone-be/common"
 	"hienviluong125/trello-clone-be/modules/listmodule/listmodel"
+	"sort"
 	"strings"
 
 	"gorm.io/gorm"
@@ -85,6 +86,16 @@ func (repo *ListRepoMysql) GetListByCondition(
 		Order("index ASC").
 		Find(&result).Error; err != nil {
 		return nil, err
+	}
+
+	for i := range moreKeys {
+		if moreKeys[i] == "Tasks" {
+			for _, list := range result {
+				sort.SliceStable(list.Tasks, func(i, j int) bool {
+					return list.Tasks[i].Index < list.Tasks[j].Index
+				})
+			}
+		}
 	}
 
 	return result, nil
