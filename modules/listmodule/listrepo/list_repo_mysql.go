@@ -19,6 +19,7 @@ type ListRepo interface {
 	Create(ctx context.Context, data *listmodel.ListCreate) error
 	FindByCondition(ctx context.Context, condition map[string]interface{}, moreKeys ...string) (*listmodel.List, error)
 	UpdateById(ctx context.Context, id int, params *listmodel.ListUpdate) error
+	SwapIndexOfTwoList(ctx context.Context, fromListId int, fromListIndex int, toListId int, toListIndex int) error
 }
 
 type ListRepoMysql struct {
@@ -87,4 +88,30 @@ func (repo *ListRepoMysql) GetListByCondition(
 	}
 
 	return result, nil
+}
+
+func (repo *ListRepoMysql) SwapIndexOfTwoList(ctx context.Context, fromListId int, fromListIndex int, toListId int, toListIndex int) error {
+	return repo.db.Transaction(func(tx *gorm.DB) error {
+		updateFromList := &listmodel.ListUpdate{Index: &fromListIndex}
+
+		if _, err := repo.FindByCondition(ctx, map[string]interface{}{"id": fromListId}); err != nil {
+			return err
+		}
+
+		if err := repo.UpdateById(ctx, fromListId, updateFromList); err != nil {
+			return err
+		}
+
+		updateToList := &listmodel.ListUpdate{Index: &toListIndex}
+
+		if _, err := repo.FindByCondition(ctx, map[string]interface{}{"id": toListId}); err != nil {
+			return err
+		}
+
+		if err := repo.UpdateById(ctx, toListId, updateToList); err != nil {
+			return err
+		}
+
+		return nil
+	})
 }

@@ -101,5 +101,6 @@ func runService(r *gin.Engine, appContext component.AppContext) {
 		boardRoutes.POST("/:id/lists", listHandler.Create)
 		boardRoutes.PUT("/:id/lists/:list_id", listHandler.Update)
 		boardRoutes.DELETE("/:id/lists/:list_id", listHandler.Destroy)
+		boardRoutes.POST("/:id/lists/swap", listHandler.SwapTwoList)
 	}
 }

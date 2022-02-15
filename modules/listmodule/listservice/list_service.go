@@ -21,6 +21,7 @@ type ListService interface {
 	FindByCondition(ctx context.Context, conditions map[string]interface{}) (*listmodel.List, error)
 	UpdateById(ctx context.Context, listId int, listUpdate *listmodel.ListUpdate) error
 	DeactiveById(ctx context.Context, listId int) error
+	SwapIndexOfTwoList(ctx context.Context, fromListId int, fromListIndex int, toListId int, toListIndex int) error
 }
 
 type ListDefaultService struct {
@@ -69,4 +70,8 @@ func (service *ListDefaultService) DeactiveById(ctx context.Context, listId int)
 	status := false
 	softDestroyParams := &listmodel.ListUpdate{Status: &status}
 	return service.repo.UpdateById(ctx, listId, softDestroyParams)
+}
+
+func (service *ListDefaultService) SwapIndexOfTwoList(ctx context.Context, fromListId int, fromListIndex int, toListId int, toListIndex int) error {
+	return service.repo.SwapIndexOfTwoList(ctx, fromListId, fromListIndex, toListId, toListIndex)
 }

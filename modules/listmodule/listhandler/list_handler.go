@@ -1,6 +1,7 @@
 package listhandler
 
 import (
+	"errors"
 	"hienviluong125/trello-clone-be/common"
 	"hienviluong125/trello-clone-be/errorhandler"
 	"hienviluong125/trello-clone-be/modules/boardmodule/boardservice"
@@ -140,6 +141,46 @@ func (handler *ListHandler) Destroy(c *gin.Context) {
 	}
 
 	if err := handler.service.DeactiveById(c.Request.Context(), listId); err != nil {
+		panic(err)
+	}
+
+	c.Status(http.StatusOK)
+}
+
+func (handler *ListHandler) SwapTwoList(c *gin.Context) {
+	if err := handler.AuthorizeBoardOwner(c); err != nil {
+		panic(err)
+	}
+
+	var swapTwoListParams map[string]*int
+
+	if err := c.ShouldBind(&swapTwoListParams); err != nil {
+		panic(err)
+	}
+
+	if _, ok := swapTwoListParams["fromListId"]; !ok {
+		panic(errorhandler.ErrBadRequest(errors.New("fromListId parameter can't be blank")))
+	}
+
+	if _, ok := swapTwoListParams["fromListIndex"]; !ok {
+		panic(errorhandler.ErrBadRequest(errors.New("fromLisstIndex parameter can't be blank")))
+	}
+
+	if _, ok := swapTwoListParams["toListId"]; !ok {
+		panic(errorhandler.ErrBadRequest(errors.New("toListId parameter can't be blank")))
+	}
+
+	if _, ok := swapTwoListParams["toListIndex"]; !ok {
+		panic(errorhandler.ErrBadRequest(errors.New("toListIndex parameter can't be blank")))
+	}
+
+	if err := handler.service.SwapIndexOfTwoList(
+		c.Request.Context(),
+		*swapTwoListParams["fromListId"],
+		*swapTwoListParams["fromListIndex"],
+		*swapTwoListParams["toListId"],
+		*swapTwoListParams["toListIndex"],
+	); err != nil {
 		panic(err)
 	}
 
