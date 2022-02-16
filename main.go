@@ -48,10 +48,10 @@ func main() {
 	appContext := component.NewAppContext(db, os.Getenv("JWT_SECRET"), 8)
 
 	r := gin.Default()
+	r.Use(middleware.CORSMiddleware())
 	r.Use(middleware.Recover(appContext))
 	r.GET("/", Home)
 	runService(r, appContext)
-
 	r.Run(":8080")
 }
 

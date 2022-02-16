@@ -70,7 +70,7 @@ func (handler *ListHandler) Index(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"data":   lists,
-		"page":   paging,
+		"paging": paging,
 		"filter": filter,
 	})
 }
