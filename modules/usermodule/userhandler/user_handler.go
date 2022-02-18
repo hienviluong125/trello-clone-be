@@ -70,3 +70,16 @@ func (handler *UserHandler) KeepLogin(c *gin.Context) {
 	c.SetCookie(common.RefreshToken, *refreshToken, 60*60*24*7, "/", "localhost", false, true)
 	c.JSON(http.StatusOK, gin.H{"accessToken": accessToken})
 }
+
+func (handler *UserHandler) Logout(c *gin.Context) {
+	rfTokenCookie, err := c.Cookie(common.RefreshToken)
+
+	if err != nil {
+		panic(errorhandler.ErrBadRequest(err))
+	}
+
+	if len(rfTokenCookie) != 0 {
+		c.SetCookie(common.RefreshToken, "", -1, "/", "localhost", false, true)
+	}
+	c.Status(http.StatusOK)
+}

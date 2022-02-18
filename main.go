@@ -24,7 +24,9 @@ import (
 	"hienviluong125/trello-clone-be/modules/usermodule/userservice"
 	"log"
 	"os"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -48,8 +50,16 @@ func main() {
 	appContext := component.NewAppContext(db, os.Getenv("JWT_SECRET"), 8)
 
 	r := gin.Default()
-	r.Use(middleware.CORSMiddleware())
 	r.Use(middleware.Recover(appContext))
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Content-Type", "Authorization", "Content-Languague", "Accept-Language"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
 	r.GET("/", Home)
 	runService(r, appContext)
 	r.Run(":8080")
@@ -93,6 +103,7 @@ func runService(r *gin.Engine, appContext component.AppContext) {
 
 	r.POST("/signup", userHandler.Signup)
 	r.POST("/login", userHandler.Login)
+	r.POST("/logout", userHandler.Logout)
 	r.POST("/users/keep_login", userHandler.KeepLogin)
 	r.GET("/users/profile", middleware.Authenticate(appContext), userHandler.Profile)
 

@@ -103,23 +103,59 @@ func (repo *ListRepoMysql) GetListByCondition(
 
 func (repo *ListRepoMysql) SwapIndexOfTwoList(ctx context.Context, fromListId int, fromListIndex int, toListId int, toListIndex int) error {
 	return repo.db.Transaction(func(tx *gorm.DB) error {
-		updateFromList := &listmodel.ListUpdate{Index: &fromListIndex}
-
 		if _, err := repo.FindByCondition(ctx, map[string]interface{}{"id": fromListId}); err != nil {
 			return err
 		}
-
-		if err := repo.UpdateById(ctx, fromListId, updateFromList); err != nil {
-			return err
-		}
-
-		updateToList := &listmodel.ListUpdate{Index: &toListIndex}
 
 		if _, err := repo.FindByCondition(ctx, map[string]interface{}{"id": toListId}); err != nil {
 			return err
 		}
 
-		if err := repo.UpdateById(ctx, toListId, updateToList); err != nil {
+		var minIndex int
+		var maxIndex int
+
+		if fromListIndex > toListIndex {
+			minIndex = toListIndex
+			maxIndex = fromListIndex
+		} else {
+			minIndex = fromListIndex
+			maxIndex = toListIndex
+		}
+
+		var listInRange []listmodel.List
+		var additional int
+
+		if fromListIndex > toListIndex {
+			if err := repo.db.Table(listmodel.List{}.TableName()).Where("index < ? AND index >= ?", maxIndex, minIndex).Find(&listInRange).Error; err != nil {
+				return err
+			}
+			additional = 1
+		} else {
+			if err := repo.db.Table(listmodel.List{}.TableName()).Where("index <= ? AND index > ?", maxIndex, minIndex).Find(&listInRange).Error; err != nil {
+				return err
+			}
+			additional = -1
+		}
+
+		for _, eachListInRange := range listInRange {
+			err := repo.db.
+				Table(listmodel.List{}.TableName()).
+				Where("id = ?", eachListInRange.Id).
+				Updates(map[string]interface{}{"index": eachListInRange.Index + additional}).
+				Error
+
+			if err != nil {
+				return err
+			}
+		}
+
+		err := repo.db.
+			Table(listmodel.List{}.TableName()).
+			Where("id = ?", fromListId).
+			Updates(map[string]interface{}{"index": toListIndex}).
+			Error
+
+		if err != nil {
 			return err
 		}
 
