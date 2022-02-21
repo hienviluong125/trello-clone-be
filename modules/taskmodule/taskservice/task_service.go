@@ -21,6 +21,7 @@ type TaskService interface {
 	FindByCondition(ctx context.Context, conditions map[string]interface{}) (*taskmodel.Task, error)
 	UpdateById(ctx context.Context, taskId int, boardUpdate *taskmodel.TaskUpdate) error
 	DeactiveById(ctx context.Context, taskId int) error
+	SwapIndexOfTwoTask(ctx context.Context, fromTaskId int, toTaskId int) error
 }
 
 type TaskDefaultService struct {
@@ -65,4 +66,8 @@ func (service *TaskDefaultService) DeactiveById(ctx context.Context, taskId int)
 	status := false
 	softDestroyParams := &taskmodel.TaskUpdate{Status: &status}
 	return service.repo.UpdateById(ctx, taskId, softDestroyParams)
+}
+
+func (service *TaskDefaultService) SwapIndexOfTwoTask(ctx context.Context, fromTaskId int, toTaskId int) error {
+	return service.repo.SwapIndexOfTwoTask(ctx, fromTaskId, toTaskId)
 }

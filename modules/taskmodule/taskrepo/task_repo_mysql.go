@@ -19,6 +19,7 @@ type TaskRepo interface {
 	Create(ctx context.Context, data *taskmodel.TaskCreate) error
 	FindByCondition(ctx context.Context, condition map[string]interface{}, moreKeys ...string) (*taskmodel.Task, error)
 	UpdateById(ctx context.Context, id int, params *taskmodel.TaskUpdate) error
+	SwapIndexOfTwoTask(ctx context.Context, fromTaskId int, toTaskId int) error
 }
 
 type TaskRepoMysql struct {
@@ -99,4 +100,8 @@ func (repo *TaskRepoMysql) GetListByCondition(
 	}
 
 	return result, nil
+}
+
+func (repo *TaskRepoMysql) SwapIndexOfTwoTask(ctx context.Context, fromTaskId int, toTaskId int) error {
+	return nil
 }

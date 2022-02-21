@@ -131,5 +131,6 @@ func runService(r *gin.Engine, appContext component.AppContext) {
 		taskRoutes.POST("/", taskHandler.Create)
 		taskRoutes.PUT("/:id", taskHandler.Update)
 		taskRoutes.DELETE("/:id", taskHandler.Destroy)
+		taskRoutes.POST("/swap", taskHandler.SwapTwoTask)
 	}
 }
